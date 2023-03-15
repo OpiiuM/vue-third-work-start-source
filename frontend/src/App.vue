@@ -1,22 +1,13 @@
-<template>
-  <div class="main">
-    <img
-      :src="logo"
-      width="300"
-      height="47"
-      alt="VueWork"
-    />
-    <h1>Добро пожаловать!</h1>
-    <p>
-      Это проект Vuework для обучения на профессиональном онлайн‑курсе<br />
-      <b>«Vue.js для опытных разработчиков».</b>
-    </p>
-  </div>
-</template>
-
 <script setup>
-  import logo from '@/assets/img/logo.svg'
+import { AppLayout } from "@/layouts";
+import { HomeView } from "@/views";
 </script>
+
+<template>
+  <app-layout>
+    <home-view />
+  </app-layout>
+</template>
 
 <style lang="scss">
 @import "@/assets/scss/app.scss";
