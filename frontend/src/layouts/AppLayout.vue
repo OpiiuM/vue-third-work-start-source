@@ -1,34 +1,29 @@
 <template>
-  <div class="app_layout">
-    <app-layout-header />
-    <div class="content">
-      <app-layout-sidebar
-        :tasks="props.tasks"
-        :filters="props.filters"
-        @update-tasks="$emit('updateTasks', $event)"
-      />
-    </div>
+  <component :is="layout">
     <slot />
-  </div>
+  </component>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
-import AppLayoutHeader from '@/layouts/AppLayoutHeader.vue';
-import AppLayoutSidebar from '@/layouts/AppLayoutSidebar.vue';
+import { shallowRef, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import AppLayoutDefault from '@/layouts/AppLayoutDefault.vue';
 
-const props = defineProps({
-  tasks: {
-    type: Array,
-    required: true,
-  },
-  filters: {
-    type: Object,
-    required: true,
-  },
-});
+const route = useRoute();
+const layout = shallowRef(null);
 
-defineEmits(['updateTasks']);
+watch(
+  () => route.meta,
+  async meta => {
+    try {
+      const component = await import(`./${meta.layout}.vue`);
+      layout.value = component?.default || AppLayoutDefault;
+    } catch (e) {
+      // Если компонент не найдем, добавляем шаблон по умолчанию
+      layout.value = AppLayoutDefault;
+    }
+  }
+);
 </script>
 
 <style lang="scss" scoped>
