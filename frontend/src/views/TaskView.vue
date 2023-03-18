@@ -154,7 +154,7 @@ onMounted(() => {
 });
 
 const task = computed(() => {
-    return tasksStore.find((task) => task.id == route.params.id);
+    return tasksStore.tasks.find((task) => task.id == route.params.id);
 });
 
 const dueDate = computed(() => {
