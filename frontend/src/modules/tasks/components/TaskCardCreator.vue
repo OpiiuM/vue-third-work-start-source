@@ -170,6 +170,9 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { cloneDeep } from 'lodash';
+
+import { useTasksStore } from '@/stores/tasks';
+
 import { createNewDate, createUUIDv4 } from '@/common/helpers';
 import { STATUSES } from '@/common/constants';
 import { useTaskCardDate } from '@/common/composables';
@@ -189,7 +192,7 @@ const props = defineProps({
     },
 });
 
-const emits = defineEmits(['addTask', 'editTask', 'deleteTask']);
+const tasksStore = useTasksStore();
 const router = useRouter();
 const dialog = ref(null);
 
@@ -274,7 +277,7 @@ onMounted(() => {
 });
 
 function deleteTask() {
-    emits('deleteTask', task.value.id);
+    tasksStore.deleteTask(task.value.id);
     router.push('/');
 }
 
@@ -308,10 +311,10 @@ function submit() {
 
     if (props.taskToEdit) {
         // Редактируемая задача
-        emits('editTask', task.value);
+        tasksStore.editTask(task.value);
     } else {
         // Новая задача
-        emits('addTask', task.value);
+        tasksStore.addTask(task.value);
     }
 
     router.push('/');
