@@ -30,14 +30,14 @@
                         </div>
 
                         <div class="backlog__counter">
-                            {{ sidebarTasks.length }}
+                            {{ tasksStore.sidebarTasks.length }}
                         </div>
                     </div>
 
                     <div class="backlog__target-area">
                         <!--  Задачи в бэклоге-->
                         <task-card
-                            v-for="task in sidebarTasks"
+                            v-for="task in tasksStore.sidebarTasks"
                             :key="task.id"
                             :task="task"
                             class="backlog__task"
@@ -51,27 +51,17 @@
 </template>
 
 <script setup>
-import { reactive, defineProps, defineEmits, computed } from 'vue';
+import { reactive } from 'vue';
+
+import { useTasksStore } from '@/stores/tasks';
+
 import AppDrop from '@/common/components/AppDrop.vue';
 import TaskCard from '@/modules/tasks/components/TaskCard.vue';
+
 import { getTargetColumnTasks, addActive } from '@/common/helpers';
 
-const props = defineProps({
-    tasks: {
-        type: Array,
-        required: true,
-    },
-});
-
-const emits = defineEmits(['updateTasks']);
-
+const tasksStore = useTasksStore();
 const state = reactive({ backlogIsHidden: false });
-
-const sidebarTasks = computed(() => {
-    return props.tasks
-            .filter((task) => !task.columnId)
-            .sort((a, b) => a.sortOrder - b.sortOrder);
-});
 
 function moveTask(active, toTask) {
     // Не обновляем массив, если задача не перемещалась
@@ -80,7 +70,7 @@ function moveTask(active, toTask) {
     const toColumnId = null;
 
     // Получить задачи для текущей колонки
-    const targetColumnTasks = getTargetColumnTasks(toColumnId, props.tasks);
+    const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks);
     const activeClone = { ...active, columnId: toColumnId };
 
     // Добавить активную задачу в колонку
@@ -94,7 +84,7 @@ function moveTask(active, toTask) {
         }
     });
 
-    emits('updateTasks', tasksToUpdate);
+    tasksStore.updateTasks(tasksToUpdate);
 }
 
 </script>

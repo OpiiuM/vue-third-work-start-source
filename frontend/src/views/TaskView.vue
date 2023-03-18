@@ -130,6 +130,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useTasksStore } from '@/stores';
 import { useTaskCardDate } from '@/common/composables';
 import { getReadableDate, getImage } from '@/common/helpers';
 
@@ -137,13 +138,7 @@ import TaskCardViewTicksList from '@/modules/tasks/components/TaskCardViewTicksL
 import TaskCardViewComments from '@/modules/tasks/components/TaskCardViewComments.vue';
 import TaskCardTags from '@/modules/tasks/components/TaskCardTags.vue'; 
 
-const props = defineProps({
-    tasks: {
-        type: Array,
-        required: true,
-    },
-});
-
+const tasksStore = useTasksStore();
 const router = useRouter();
 const route = useRoute();
 
@@ -159,7 +154,7 @@ onMounted(() => {
 });
 
 const task = computed(() => {
-    return props.tasks.find((task) => task.id == route.params.id);
+    return tasksStore.tasks.find((task) => task.id == route.params.id);
 });
 
 const dueDate = computed(() => {
