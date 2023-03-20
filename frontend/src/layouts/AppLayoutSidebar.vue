@@ -21,12 +21,12 @@
                     <div class="backlog__user">
                         <div class="backlog__account">
                             <img
-                                src="@/assets/img/user6.jpg"
+                                :src="userImage"
                                 alt="Ваш аватар"
                                 width="32"
                                 height="32"
                             />
-                            Игорь Пятин
+                            {{ authStore.user.name }}
                         </div>
 
                         <div class="backlog__counter">
@@ -52,16 +52,18 @@
 
 <script setup>
 import { reactive } from 'vue';
-
-import { useTasksStore } from '@/stores/tasks';
+import { useTasksStore, useAuthStore } from '@/stores';
 
 import AppDrop from '@/common/components/AppDrop.vue';
 import TaskCard from '@/modules/tasks/components/TaskCard.vue';
 
-import { getTargetColumnTasks, addActive } from '@/common/helpers';
+import { getTargetColumnTasks, addActive, getPublicImage } from '@/common/helpers';
 
 const tasksStore = useTasksStore();
+const authStore = useAuthStore();
 const state = reactive({ backlogIsHidden: false });
+
+const userImage = getPublicImage(authStore.user.avatar);
 
 function moveTask(active, toTask) {
     // Не обновляем массив, если задача не перемещалась
@@ -86,7 +88,6 @@ function moveTask(active, toTask) {
 
     tasksStore.updateTasks(tasksToUpdate);
 }
-
 </script>
 
 <style lang="scss" scoped>

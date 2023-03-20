@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
-import { useFiltersStore } from '@/stores/filters';
-import { useUsersStore } from '@/stores/users';
-import { normalizeTask } from '@/common/helpers';
-import tasks from '@/mocks/tasks.json';
+import { useFiltersStore, useUsersStore, useTicksStore } from '@/stores';
+import { tasksService } from '@/services';
 
 export const useTasksStore = defineStore('tasks', {
     state: () => ({
@@ -42,6 +40,26 @@ export const useTasksStore = defineStore('tasks', {
                                 !filtersStore.filters[key].length || callback(task));
             });
         },
+        getTaskById: (state) => (id) => {
+            // TODO:
+            console.log('getTaskById', id);
+
+            const ticksStore = useTicksStore();
+            const usersStore = useUsersStore();
+            const task = state.tasks.find((task) => task.id === id);
+
+            if (!task) return null;
+
+            // Добавляем подзадачи
+            task.ticks = ticksStore.getTicksByTaskId(task.id);
+
+            // Добавляем пользователя
+            task.user = usersStore.users.find((user) => user.id === task.userId);
+
+            console.log(task);
+
+            return task;
+        },
         getTaskUserById: () => (id) => {
             const usersStore = useUsersStore();
 
@@ -55,43 +73,32 @@ export const useTasksStore = defineStore('tasks', {
     },
     actions: {
         async fetchTasks() {
-            this.tasks = tasks.map((task) => normalizeTask(task));
+            this.tasks = await tasksService.fetchTasks();
         },
         updateTasks(tasksToUpdate) {
-            tasksToUpdate.forEach((task) => {
+            tasksToUpdate.forEach(async (task) => {
                 const index = this.tasks.findIndex(({ id }) => id === task.id);
 
                 if (~index) {
+                    await tasksService.updateTask(task);
                     this.tasks.splice(index, 1, task);
                 }
             });
         },
-        addTask(task) {
-            // Нормализуем задачу
-            const newTask = normalizeTask(task);
+        async addTask(task) {
+            // Добавляем задачу в конец списка задач в беклоге
+            task.sortOrder = this.tasks.filter((task) => !task.columnId).length;
+            const newTask = await tasksService.createTask(task);
 
-            // Добавляем идентификатор, последний элемент в списке задач
-            // После подключения сервера идентификатор будет присваиваться сервером
-            newTask.id = this.tasks.length + 1;
-
-            // Добавляем задачу в конец списка задач в бэклоге
-            newTask.sortOrder = this.tasks.filter((task) => !task.columnId).length;
-
-            // Если задаче присвоен исполнитель, то добавляем объект пользователя в задачу
-            if (newTask.userId) {
-                newTask.user = {
-                    ...this.getTaskUserById(newTask.userId),
-                }
-            }
-
-            this.tasks = [...this.tasks, newTask];;
+            // Добавляем задачу в массив
+            this.tasks = [...this.task, newTask];
+            return newTask;
         },
-        editTask(task) {
+        async editTask(task) {
+            const newTask = await tasksService.updateTask(task);
             const index = this.tasks.findIndex(({ id }) => task.id === id);
 
             if (~index) {
-                const newTask = normalizeTask(task);
-
                 if (newTask.userId) {
                     newTask.user = {
                         ...this.getTaskUserById(newTask.userId),
@@ -100,8 +107,11 @@ export const useTasksStore = defineStore('tasks', {
 
                 this.tasks.splice(index, 1, newTask);
             }
+
+            return newTask;
         },
-        deleteTask(id) {
+        async deleteTask(id) {
+            await tasksService.deleteTask(id);
             this.tasks = this.tasks.filter((task) => task.id !== id);
         },
     },

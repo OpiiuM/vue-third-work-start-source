@@ -23,6 +23,7 @@
                     </h1>
                     <!--Кнопка редактирования задачи-->
                     <a
+                        v-if="authStore.getUserAttribute('isAdmin')"
                         class="task-card__edit"
                         @click="router.push({
                             name: 'TaskEdit',
@@ -49,7 +50,7 @@
                                 class="task-card__user"
                             >
                                 <img
-                                    :src="getImage(task.user.avatar)"
+                                    :src="getPublicImage(task.user.avatar)"
                                     :alt="task.user.name"
                                 />
                                 {{ task.user.name }}
@@ -130,21 +131,19 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useTasksStore } from '@/stores';
+import { useTasksStore, useAuthStore } from '@/stores';
 import { useTaskCardDate } from '@/common/composables';
-import { getReadableDate, getImage } from '@/common/helpers';
+import { getReadableDate, getPublicImage } from '@/common/helpers';
 
 import TaskCardViewTicksList from '@/modules/tasks/components/TaskCardViewTicksList.vue';
 import TaskCardViewComments from '@/modules/tasks/components/TaskCardViewComments.vue';
 import TaskCardTags from '@/modules/tasks/components/TaskCardTags.vue'; 
 
 const tasksStore = useTasksStore();
+const authStore = useAuthStore();
+
 const router = useRouter();
 const route = useRoute();
-
-const closeDialog = function () {
-  router.push('/');
-};
 
 const dialog = ref(null);
 
@@ -154,19 +153,21 @@ onMounted(() => {
 });
 
 const task = computed(() => {
-    return tasksStore.tasks.find((task) => task.id == route.params.id);
+    console.log('route.params.id', route.params.id);
+    return tasksStore.getTaskById(route.params.id);
 });
+
+if (!task.value) {
+    // Вернуть пользователя на главную страницу если задача не найдена
+    router.push('/');
+}
 
 const dueDate = computed(() => {
     return getReadableDate(task.value.dueDate || '');
 });
 
-const addCommentToList = function (comment) {
-    if (!task.value.comments) {
-        task.value.comments = [];
-    }
-
-    task.value.comments.push(comment);
+const closeDialog = function () {
+  router.push('/');
 };
 </script>
 
