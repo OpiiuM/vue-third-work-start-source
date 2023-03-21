@@ -1,53 +1,58 @@
 <template>
-    <!--  Отслеживает, в какую колонку передана задача-->
-    <app-drop
-        class="backlog"
-        :class="{ 'backlog--hide': state.backlogIsHidden }"
-        @drop="moveTask"
-    >
-        <!--  Отвечает за открытие и закрытие бэклога-->
-        <button
-            class="backlog__title"
-            @click="state.backlogIsHidden = !state.backlogIsHidden"
-        >
-            <span>
-                Бэклог
-            </span>
-        </button>
-        <div class="backlog__content">
+	<!--  Отслеживает, в какую колонку передана задача-->
+	<app-drop
+		class="backlog"
+		:class="{ 'backlog--hide': state.backlogIsHidden }"
+		@drop="moveTask"
+	>
+		<!--  Отвечает за открытие и закрытие бэклога-->
+		<button
+			class="backlog__title"
+			@click="state.backlogIsHidden = !state.backlogIsHidden"
+		>
+			<span>
+				Бэклог
+			</span>
+		</button>
+		<div class="backlog__content">
 
-            <div class="backlog__scroll">
-                <div class="backlog__collapse">
-                    <div class="backlog__user">
-                        <div class="backlog__account">
-                            <img
-                                :src="userImage"
-                                alt="Ваш аватар"
-                                width="32"
-                                height="32"
-                            />
-                            {{ authStore.user.name }}
-                        </div>
+			<div class="backlog__scroll">
+				<div class="backlog__collapse">
+					<div class="backlog__user">
+						<div class="backlog__account">
+							<img
+								:src="userImage"
+								alt="Ваш аватар"
+								width="32"
+								height="32"
+							/>
+							{{ authStore.user.name }}
+						</div>
 
-                        <div class="backlog__counter">
-                            {{ tasksStore.sidebarTasks.length }}
-                        </div>
-                    </div>
+						<div class="backlog__counter">
+							{{ tasksStore.sidebarTasks.length }}
+						</div>
+					</div>
 
-                    <div class="backlog__target-area">
-                        <!--  Задачи в бэклоге-->
-                        <task-card
-                            v-for="task in tasksStore.sidebarTasks"
-                            :key="task.id"
-                            :task="task"
-                            class="backlog__task"
-                            @drop="moveTask($event, task)"
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
-    </app-drop>
+					<div class="backlog__target-area">
+						<!--  Задачи в бэклоге-->
+						<transition-group name="tasks">
+							<div
+								v-for="task in tasksStore.sidebarTasks"
+								:key="task.id"
+							>
+								<task-card
+									:task="task"
+									class="backlog__task"
+									@drop="moveTask($event, task)"
+								/>
+							</div>
+						</transition-group>
+					</div>
+				</div>
+			</div>
+		</div>
+	</app-drop>
 </template>
 
 <script setup>
@@ -66,27 +71,27 @@ const state = reactive({ backlogIsHidden: false });
 const userImage = getPublicImage(authStore.user.avatar);
 
 function moveTask(active, toTask) {
-    // Не обновляем массив, если задача не перемещалась
-    if (toTask && active.id === toTask.id) return;
+	// Не обновляем массив, если задача не перемещалась
+	if (toTask && active.id === toTask.id) return;
 
-    const toColumnId = null;
+	const toColumnId = null;
 
-    // Получить задачи для текущей колонки
-    const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks);
-    const activeClone = { ...active, columnId: toColumnId };
+	// Получить задачи для текущей колонки
+	const targetColumnTasks = getTargetColumnTasks(toColumnId, tasksStore.tasks);
+	const activeClone = { ...active, columnId: toColumnId };
 
-    // Добавить активную задачу в колонку
-    const resultTasks = addActive(activeClone, toTask, targetColumnTasks);
-    const tasksToUpdate = [];
+	// Добавить активную задачу в колонку
+	const resultTasks = addActive(activeClone, toTask, targetColumnTasks);
+	const tasksToUpdate = [];
 
-    resultTasks.forEach((task, index) => {
-        if (task.sortOrder !== index || task.id === active.id) {
-            const newTask = { ...task, sortOrder: index };
-            tasksToUpdate.push(newTask);
-        }
-    });
+	resultTasks.forEach((task, index) => {
+		if (task.sortOrder !== index || task.id === active.id) {
+			const newTask = { ...task, sortOrder: index };
+			tasksToUpdate.push(newTask);
+		}
+	});
 
-    tasksStore.updateTasks(tasksToUpdate);
+	tasksStore.updateTasks(tasksToUpdate);
 }
 </script>
 
@@ -94,173 +99,185 @@ function moveTask(active, toTask) {
 @import "@/assets/scss/app.scss";
 
 .backlog {
-    $bl: ".backlog";
+	$bl: ".backlog";
 
-    display: flex;
-    overflow: hidden;
-    flex-direction: column;
-    flex-grow: 1;
+	display: flex;
+	overflow: hidden;
+	flex-direction: column;
+	flex-grow: 1;
 
-    min-width: 400px;
-    max-width: 400px;
-    padding-top: 16px;
+	min-width: 400px;
+	max-width: 400px;
+	padding-top: 16px;
 
-    background-color: $gray-100;
+	background-color: $gray-100;
 
-    &--hide {
-        min-width: 40px;
-        max-width: 40px;
+	&--hide {
+		min-width: 40px;
+		max-width: 40px;
 
-        #{$bl}__title {
-            &::before {
-                transform: translateY(-53%);
-            }
-        }
+		#{$bl}__title {
+			&::before {
+				transform: translateY(-53%);
+			}
+		}
 
-        #{$bl}__scroll {
-            visibility: hidden;
-            overflow: hidden;
-        }
-    }
+		#{$bl}__scroll {
+			visibility: hidden;
+			overflow: hidden;
+		}
+	}
 
-    &__title {
-        position: relative;
+	&__title {
+		position: relative;
 
-        height: 26px;
-        margin-bottom: 5px;
-        margin-left: 12px;
-        padding-left: 28px;
+		height: 26px;
+		margin-bottom: 5px;
+		margin-left: 12px;
+		padding-left: 28px;
 
-        cursor: pointer;
-        text-align: left;
+		cursor: pointer;
+		text-align: left;
 
-        color: $blue-gray-600;
-        border: none;
-        background-color: transparent;
+		color: $blue-gray-600;
+		border: none;
+		background-color: transparent;
 
-        &::before {
-            position: absolute;
-            top: 50%;
-            left: 0;
+		&::before {
+			position: absolute;
+			top: 50%;
+			left: 0;
 
-            width: 24px;
-            height: 24px;
+			width: 24px;
+			height: 24px;
 
-            content: "";
-            transition: $animationSpeed;
-            transform: translateY(-53%) rotate(180deg);
+			content: "";
+			transition: $animationSpeed;
+			transform: translateY(-53%) rotate(180deg);
 
-            background-image: url("@/assets/img/arrow-right.svg");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-        }
+			background-image: url("@/assets/img/arrow-right.svg");
+			background-repeat: no-repeat;
+			background-position: center;
+			background-size: cover;
+		}
 
-        span {
-            @include m-s14-h21;
-        }
-    }
+		span {
+			@include m-s14-h21;
+		}
+	}
 
-    &__content {
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
+	&__content {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
 
-        width: 400px;
+		width: 400px;
 
-        background-color: $gray-100;
-    }
+		background-color: $gray-100;
+	}
 
-    &__scroll {
-        overflow-y: auto;
-        flex-grow: 1;
+	&__scroll {
+		overflow-y: auto;
+		flex-grow: 1;
 
-        height: 1px;
-        padding-bottom: 20px;
-    }
+		height: 1px;
+		padding-bottom: 20px;
+	}
 
-    &__collapse {
-        padding-bottom: 1px;
+	&__collapse {
+		padding-bottom: 1px;
 
-        border-bottom: 1px solid $blue-gray-200;
-    }
+		border-bottom: 1px solid $blue-gray-200;
+	}
 
-    &__user {
-        display: flex;
-        align-items: center;
+	&__user {
+		display: flex;
+		align-items: center;
 
-        box-sizing: border-box;
-        width: 100%;
-        margin: 0;
-        padding: 15px 12px;
+		box-sizing: border-box;
+		width: 100%;
+		margin: 0;
+		padding: 15px 12px;
 
-        text-align: left;
+		text-align: left;
 
-        border: none;
-        outline: none;
-        background-color: transparent;
+		border: none;
+		outline: none;
+		background-color: transparent;
 
-        &:active {
-            color: inherit;
-        }
-    }
+		&:active {
+			color: inherit;
+		}
+	}
 
-    &__account {
-        display: flex;
-        align-items: center;
+	&__account {
+		display: flex;
+		align-items: center;
 
-        max-width: 80%;
-        margin-right: auto;
+		max-width: 80%;
+		margin-right: auto;
 
-        @include m-s18-h21;
+		@include m-s18-h21;
 
-        img {
-            width: 32px;
-            height: 32px;
-            margin-right: 8px;
+		img {
+			width: 32px;
+			height: 32px;
+			margin-right: 8px;
 
-            border-radius: 50%;
-        }
-    }
+			border-radius: 50%;
+		}
+	}
 
-    &__counter {
-        box-sizing: border-box;
-        width: 32px;
-        height: 32px;
-        padding-top: 6px;
+	&__counter {
+		box-sizing: border-box;
+		width: 32px;
+		height: 32px;
+		padding-top: 6px;
 
-        text-align: center;
+		text-align: center;
 
-        border-radius: 50%;
-        background-color: $blue-gray-100;
+		border-radius: 50%;
+		background-color: $blue-gray-100;
 
-        @include m-s18-h21;
-    }
+		@include m-s18-h21;
+	}
 
-    &__arrow {
-        width: 10px;
-        height: 30px;
-        margin: 0 0 0 18px;
-        padding: 0;
+	&__arrow {
+		width: 10px;
+		height: 30px;
+		margin: 0 0 0 18px;
+		padding: 0;
 
-        cursor: pointer;
+		cursor: pointer;
 
-        border: none;
-        outline: none;
-        background-color: transparent;
-        background-image: url("@/assets/img/icon-arrow.svg");
-        background-repeat: no-repeat;
-        background-position: center;
+		border: none;
+		outline: none;
+		background-color: transparent;
+		background-image: url("@/assets/img/icon-arrow.svg");
+		background-repeat: no-repeat;
+		background-position: center;
 
-        &--top {
-            transform: rotate(180deg);
-        }
-    }
+		&--top {
+			transform: rotate(180deg);
+		}
+	}
 
-    &__task {
-        margin-right: 12px;
-        margin-bottom: 11px;
-        margin-left: 12px;
-    }
+	&__task {
+		margin-right: 12px;
+		margin-bottom: 11px;
+		margin-left: 12px;
+	}
+}
+
+.tasks-enter-active,
+.tasks-leave-active {
+	transition: all $animationSpeed ease;
+}
+
+.tasks-enter,
+.tasks-leave-to {
+	transform: scale(1.1);
+
+	opacity: 0;
 }
 </style>
