@@ -55,8 +55,8 @@ import { useAuthStore, useCommentsStore } from '@/stores';
 import AppTextarea from '@/common/components/AppTextarea.vue';
 import AppButton from '@/common/components/AppButton.vue';
 
-import { validateFields } from '@/common/validator';
-import { getPublicImage } from '@/common/helpers'
+import { validateFields, clearValidationErrors } from '@/common/validator';
+import { getPublicImage } from '@/common/helpers';
 
 const authStore = useAuthStore();
 const commentsStore = useCommentsStore();
@@ -64,7 +64,7 @@ const commentsStore = useCommentsStore();
 const props = defineProps({
 	taskId: {
 		type: Number,
-		required: true
+		required: true,
 	},
 });
 

@@ -41,12 +41,9 @@ export const useTasksStore = defineStore('tasks', {
             });
         },
         getTaskById: (state) => (id) => {
-            // TODO:
-            console.log('getTaskById', id);
-
             const ticksStore = useTicksStore();
             const usersStore = useUsersStore();
-            const task = state.tasks.find((task) => task.id === id);
+            const task = state.tasks.find((task) => task.id == id);
 
             if (!task) return null;
 
@@ -55,8 +52,6 @@ export const useTasksStore = defineStore('tasks', {
 
             // Добавляем пользователя
             task.user = usersStore.users.find((user) => user.id === task.userId);
-
-            console.log(task);
 
             return task;
         },
@@ -91,7 +86,7 @@ export const useTasksStore = defineStore('tasks', {
             const newTask = await tasksService.createTask(task);
 
             // Добавляем задачу в массив
-            this.tasks = [...this.task, newTask];
+            this.tasks = [...this.tasks, newTask];
             return newTask;
         },
         async editTask(task) {

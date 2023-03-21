@@ -153,7 +153,6 @@ onMounted(() => {
 });
 
 const task = computed(() => {
-    console.log('route.params.id', route.params.id);
     return tasksStore.getTaskById(route.params.id);
 });
 

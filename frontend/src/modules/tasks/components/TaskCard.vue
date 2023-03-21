@@ -8,7 +8,7 @@
 			<div
 				class="task"
 				:data-id="task.id"
-				@click="clickHandler()"
+				@click="router.push({ path: `/${props.task.id}` })"
 			>
 				<div
 					v-if="taskUser"
@@ -66,6 +66,7 @@ import TaskCardTags from '@/modules/tasks/components/TaskCardTags.vue';
 import { getPublicImage } from '@/common/helpers';
 
 const usersStore = useUsersStore();
+
 const router = useRouter();
 
 const props = defineProps({
@@ -75,16 +76,11 @@ const props = defineProps({
 	},
 });
 
-defineEmits(['drop']);
+defineEmits(['drop', 'click']);
 
 const taskUser = computed(() => {
 	return usersStore.users.find((user) => user.id === props.task.userId);
 });
-
-const clickHandler = () => {
-	console.log('clickHandler');
-	router.push({ path: `/${props.task.id}` })
-};
 </script>
 
 <style lang="scss" scoped>

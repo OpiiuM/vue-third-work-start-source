@@ -5,11 +5,11 @@ export default class FetchProvider {
         return '?' + queryParams.toString();
     }
 
-    request(options) {
+    async request(options) {
         const body = options.data ? JSON.stringify(options.data) : null;
 
         return fetch(
-            options.baseURL + options.path + this.computeQueryParams(options.query),
+            options.baseUrl + options.path + this.computeQueryParams(options.query),
             { header: options.headers, body, method: options.method }
         ).then((response) => {
             if (!response.ok) {

@@ -11,6 +11,7 @@ export const useColumnsStore = defineStore('columns', {
             this.columns = await columnsService.fetchColumns();
         },
         async addColumn() {
+            // При создании колонки мы добавляем дефолтную колонку, которую можем изменить позже
             const newColumn = await columnsService.createColumn({ title: 'Новый столбец' });
             this.columns.push(newColumn);
         },

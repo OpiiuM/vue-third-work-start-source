@@ -331,7 +331,7 @@ async function submit() {
 
   if (props.taskToEdit) {
     // Редактируемая задача
-    tasksStore.editTask(task.value);
+    await tasksStore.editTask(task.value);
   } else {
     // Новая задача
     const newTask = await tasksStore.addTask(task.value);

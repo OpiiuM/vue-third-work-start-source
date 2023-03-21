@@ -7,9 +7,9 @@ const BASE_URL = '/api/users';
 class UsersService extends HttpClient {
     async fetchUsers() {
         try {
-            return this.get('/')
+            return this.get('/');
         } catch (e) {
-            throw Error(e)
+            throw Error(e);
         }
     }
 }
