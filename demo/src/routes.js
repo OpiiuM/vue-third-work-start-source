@@ -19,4 +19,9 @@ export default [
         path: "/counter-5",
         component: () => import("./demo5/Server.vue"),
     },
+    {
+        name: "Counter Base 6",
+        path: "/counter-6",
+        component: () => import("./demo6/DemoView.vue"),
+    },
 ];
