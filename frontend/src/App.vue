@@ -5,18 +5,28 @@
 </template>
 
 <script setup>
-import { useTasksStore, useColumnsStore, useUsersStore } from '@/stores';
+import {
+  useTasksStore,
+  useColumnsStore,
+  useUsersStore,
+  useCommentsStore,
+  useTicksStore,
+} from '@/stores';
 
 import { AppLayout } from '@/layouts';
 
 const tasksStore = useTasksStore();
 const usersStore = useUsersStore();
 const columnsStore = useColumnsStore();
+const commentsStore = useCommentsStore();
+const ticksStore = useTicksStore();
 
 // Загрузка первоначальных данных
 void tasksStore.fetchTasks();
 void usersStore.fetchUsers();
 void columnsStore.fetchColumns();
+void commentsStore.fetchComments();
+void ticksStore.fetchTicks();
 </script>
 
 <style lang="scss">
